@@ -3,11 +3,15 @@ import requests
 from datetime import datetime
 from connection import db, init_db
 from db import db, WeatherDetails, CitiesDates
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 init_db(app)
 
-API_KEY = 'd9db6586cfd1077e913484e6117d8b3d'
+API_KEY = os.getenv('API_KEY', 'd9db6586cfd1077e913484e6117d8b3d')
 
 
 @app.route('/', methods=['GET', 'POST'])
