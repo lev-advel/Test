@@ -4,9 +4,9 @@
     <h1>Weather Forecast</h1>
 
     <form method="POST" action="/">
-        <input type="text" name="city" placeholder="Enter city" value="{{ city }}" required>
-        <button type="submit">Get Forecast</button>
+        <input type="text" name="city" id="cityInput" placeholder="Enter city, country" value="{{ city }}" required autocomplete="off">        <button type="submit">Get Forecast</button>
         <button type="button" onclick="location.href='/history'">Forecast History</button>
+        <div id="autocompleteResults" class="autocomplete-results"></div>
     </form>
 
     {% if error %}
@@ -75,4 +75,39 @@
         </table>
     </div>
     {% endif %}
+
+ <script>
+        document.getElementById('cityInput').addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 2) {
+                document.getElementById('autocompleteResults').innerHTML = '';
+                return;
+            }
+
+            fetch(`/autocomplete?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsContainer = document.getElementById('autocompleteResults');
+                    resultsContainer.innerHTML = '';
+
+                    data.forEach(item => {
+                        const option = document.createElement('div');
+                        option.className = 'autocomplete-item';
+                        option.textContent = item.name;
+                        option.addEventListener('click', () => {
+                            document.getElementById('cityInput').value = item.value;
+                            resultsContainer.innerHTML = '';
+                        });
+                        resultsContainer.appendChild(option);
+                    });
+                });
+        });
+
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'cityInput') {
+                document.getElementById('autocompleteResults').innerHTML = '';
+            }
+        });
+    </script>
 {% endblock %}

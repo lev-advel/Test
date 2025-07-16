@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import requests
 from datetime import datetime
 from connection import db, init_db
@@ -26,7 +26,15 @@ def weather():
 @app.route('/weather/<city>')
 def get_weather(city):
     try:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+        parts = [part.strip() for part in city.split(',')]
+        city_name = parts[0]
+        country_code = parts[1] if len(parts) > 1 else None
+
+        if country_code:
+            url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name},{country_code}&appid={API_KEY}&units=metric"
+        else:
+            url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={API_KEY}&units=metric"
+
         response = requests.get(url).json()
 
         # Check for API error
@@ -67,7 +75,7 @@ def get_weather(city):
             db.session.flush()
 
             city_date = CitiesDates(
-                city_name=city,
+                city_name=f"{response['name']}, {response['sys']['country']}",
                 datetime=datetime.now(),
                 weather_id=weather_data.id
             )
@@ -100,6 +108,28 @@ def get_weather(city):
         return render_template('index.html',
                            city=city if 'city' in locals() else '',
                            error=f"Error: {str(e)}")
+
+
+@app.route('/autocomplete')
+def autocomplete():
+    query = request.args.get('q', '')
+    if len(query) < 2:
+        return jsonify([])
+
+    url = f"http://api.openweathermap.org/geo/1.0/direct?q={query}&limit=5&appid={API_KEY}"
+    response = requests.get(url).json()
+
+    suggestions = []
+    for location in response:
+        name = f"{location['name']}, {location.get('country', '')}"
+        if 'state' in location:
+            name += f", {location['state']}"
+        suggestions.append({
+            'name': name,
+            'value': f"{location['name']},{location.get('country', '')}"
+        })
+
+    return jsonify(suggestions)
 
 
 @app.route('/history')
