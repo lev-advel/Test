@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Weather Forecast</h1>
+
+    <form method="POST" action="/">
+        <input type="text" name="city" placeholder="Enter city" value="{{ city }}" required>
+        <button type="submit">Get Forecast</button>
+        <button type="button" onclick="location.href='/history'">Forecast History</button>
+    </form>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if weather_data %}
+    <div class="weather-info">
+        <p><strong>Temperature:</strong> {{weather_data.temperature}}°C</p>
+        <p><strong>Feels like:</strong> {{weather_data.feels_like}}°C</p>
+        <p><strong>Minimum temperature:</strong> {{weather_data.temp_min}}°C</p>
+        <p><strong>Maximum temperature:</strong> {{weather_data.temp_max}}°C</p>
+        <p><strong>Pressure:</strong> {{weather_data.pressure}} hPa</p>
+        <p><strong>Humidity:</strong> {{weather_data.humidity}}%</p>
+        <p><strong>Wind:</strong> {{weather_data.wind_speed}} m/s, {{weather_data.wind_dir}}</p>
+        <p><strong>Cloudiness:</strong> {{weather_data.clouds}}%</p>
+        <p><strong>Visibility:</strong> {{weather_data.visibility}} meters</p>
+        <p><strong>Sunrise:</strong> {{weather_data.sunrise.strftime('%H:%M')}}</p>
+        <p><strong>Sunset:</strong> {{weather_data.sunset.strftime('%H:%M')}}</p>
+        <p><strong>Description:</strong> {{weather_data.description}}</p>
+    </div>
+    {% endif %}
+
+  {% if history_data %}
+    <div class="history-container">
+        <h2>Request History</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Request Date</th>
+                    <th>Temperature</th>
+                    <th>Feels Like</th>
+                    <th>Min Temp</th>
+                    <th>Max Temp</th>
+                    <th>Pressure</th>
+                    <th>Humidity</th>
+                    <th>Wind</th>
+                    <th>Cloudiness</th>
+                    <th>Visibility</th>
+                    <th>Sunrise</th>
+                    <th>Sunset</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history_data %}
+                <tr>
+                    <td>{{item.city_name}}</td>
+                    <td>{{item.datetime.strftime('%d-%m-%Y %H:%M')}}</td>
+                    <td>{{item.weather.temperature}}°C</td>
+                    <td>{{item.weather.feels_like}}°C</td>
+                    <td>{{item.weather.temp_min}}°C</td>
+                    <td>{{item.weather.temp_max}}°C</td>
+                    <td>{{item.weather.pressure}} hPa</td>
+                    <td>{{item.weather.humidity}}%</td>
+                    <td>{{item.weather.wind_speed}} m/s, {{item.weather.wind_dir}} </td>
+                    <td>{{item.weather.clouds}} %</td>
+                    <td>{{item.weather.visibility}} meters</td>
+                    <td>{{item.weather.sunrise.strftime('%H:%M')}} </td>
+                    <td>{{item.weather.sunset.strftime('%H:%M')}}</td>
+                    <td>{{item.weather.description}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% endblock %}
