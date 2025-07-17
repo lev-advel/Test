@@ -11,7 +11,10 @@ load_dotenv()
 app = Flask(__name__)
 init_db(app)
 
-API_KEY = os.getenv('API_KEY', 'd9db6586cfd1077e913484e6117d8b3d')
+API_KEY = os.getenv('API_KEY')
+if not API_KEY:
+    raise ValueError("Error: API_KEY must be set. Run with: `API_KEY=your_key docker-compose up`")
+
 
 
 @app.route('/', methods=['GET', 'POST'])
